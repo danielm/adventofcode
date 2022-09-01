@@ -2,8 +2,34 @@ use regex::Regex;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 
-// TODO: instead of bool, lets use a i32
-// -> starts at 0
+struct Light {
+    status: bool,
+    brightness: u32,
+}
+
+impl Light {
+    fn new() -> Light {
+        Light { status: false, brightness: 0 }
+    }
+
+    fn turn_on(&mut self) {
+        self.status = true;
+        self.brightness += 1;
+    }
+
+    fn turn_off(&mut self) {
+        self.status = false;
+
+        if self.brightness > 0 {
+            self.brightness -= 1;
+        }
+    }
+
+    fn toggle(&mut self) {
+        self.status = !self.status;
+        self.brightness += 2;
+    }
+}
 
 fn main() -> io::Result<()> {
     let mut grid = init_grid(1000, 1000);
@@ -15,14 +41,15 @@ fn main() -> io::Result<()> {
         run_instruction(&mut grid, row.unwrap().as_str());
     }
 
-    let result = count_lights_on(&grid);
+    let result = get_lights_report(&grid);
 
-    println!("P1> Lights on: {}", result);
+    println!("P1> Lights on: {}", result.0);
+    println!("P2> Total Brightness: {}", result.1);
 
     Ok(())
 }
 
-fn run_instruction(grid: &mut Vec<Vec<bool>>, instruction: &str) {
+fn run_instruction(grid: &mut Vec<Vec<Light>>, instruction: &str) {
     let re = Regex::new(r"^(?P<cmd>turn on|turn off|toggle) (?P<x1>\d+),(?P<y1>\d+) through (?P<x2>\d+),(?P<y2>\d+)$").unwrap();
 
     let cap = re.captures(instruction).expect("Failed to parse the intruction");
@@ -38,9 +65,9 @@ fn run_instruction(grid: &mut Vec<Vec<bool>>, instruction: &str) {
     for i in x1..=x2 {
         for j in y1..=y2 {
             match cmd {
-                "turn on" => grid[i][j] = true,
-                "turn off" => grid[i][j] = false,
-                "toggle" => grid[i][j] = !grid[i][j],
+                "turn on" => grid[i][j].turn_on(),
+                "turn off" => grid[i][j].turn_off(),
+                "toggle" => grid[i][j].toggle(),
                 _ => panic!("unsupported command")
             }
 
@@ -48,14 +75,14 @@ fn run_instruction(grid: &mut Vec<Vec<bool>>, instruction: &str) {
     }
 }
 
-fn init_grid(x: i32, y: i32) -> Vec<Vec<bool>> {
-    let mut grid: Vec<Vec<bool>> = Vec::new();
+fn init_grid(x: i32, y: i32) -> Vec<Vec<Light>> {
+    let mut grid: Vec<Vec<Light>> = Vec::new();
 
     for _i in 0..x {
-        let mut row: Vec<bool> = Vec::new();
+        let mut row: Vec<Light> = Vec::new();
 
         for _j in 0..y {
-           row.push(false); 
+           row.push(Light::new()); 
         }
 
         grid.push(row);
@@ -64,18 +91,21 @@ fn init_grid(x: i32, y: i32) -> Vec<Vec<bool>> {
     return grid;
 }
 
-fn count_lights_on(grid: &Vec<Vec<bool>>) -> i32 {
-    let mut counter: i32 = 0;
+fn get_lights_report(grid: &Vec<Vec<Light>>) -> (u32, u32) {
+    let mut counter: u32 = 0;
+    let mut brightness: u32 = 0;
 
     for row in grid {
         for light in row {
-            if *light {
+            if light.status {
                 counter += 1;
             }
+
+            brightness += light.brightness;
         }
     }
 
-    return counter;
+    return (counter, brightness);
 }
 
 ///
@@ -94,9 +124,9 @@ mod tests {
 
         run_instruction(&mut grid, "turn on 0,0 through 999,999");
 
-        let result = count_lights_on(&grid);
+        let result = get_lights_report(&grid);
 
-        assert_eq!(result, 1000000);
+        assert_eq!(result.0, 1000000);
     }
 
     #[test]
@@ -105,9 +135,9 @@ mod tests {
 
         run_instruction(&mut grid, "toggle 0,0 through 999,0");
 
-        let result = count_lights_on(&grid);
+        let result = get_lights_report(&grid);
 
-        assert_eq!(result, 1000);
+        assert_eq!(result.0, 1000);
     }
 
     #[test]
@@ -116,8 +146,30 @@ mod tests {
 
         run_instruction(&mut grid, "turn off 499,499 through 500,500");
 
-        let result = count_lights_on(&grid);
+        let result = get_lights_report(&grid);
 
-        assert_eq!(result, 0);
+        assert_eq!(result.0, 0);
+    }
+
+    #[test]
+    fn case_4() {
+        let mut grid = init_grid(1000, 1000);
+
+        run_instruction(&mut grid, "turn on 0,0 through 0,0");
+
+        let result = get_lights_report(&grid);
+
+        assert_eq!(result.1, 1);
+    }
+
+    #[test]
+    fn case_5() {
+        let mut grid = init_grid(1000, 1000);
+
+        run_instruction(&mut grid, "toggle 0,0 through 999,999");
+
+        let result = get_lights_report(&grid);
+
+        assert_eq!(result.1, 2000000);
     }
 }
