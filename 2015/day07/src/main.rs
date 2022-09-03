@@ -21,7 +21,15 @@ fn main() -> io::Result<()> {
         gates.insert(String::from(output), String::from(input));
     }
 
-    println!("P1> Signal at 'a' is {}",get_signal(&mut gates, "a"));
+    let mut gates_p2 = gates.clone();
+
+    let mut signal_a = get_signal(&mut gates, "a");
+    println!("P1> Signal at 'a' is {}", signal_a);
+
+    *gates_p2.get_mut("b").unwrap() = signal_a.to_string();
+
+    signal_a = get_signal(&mut gates_p2, "a");
+    println!("P2> New Signal at 'a' is {}", signal_a);
 
     Ok(())
 }
