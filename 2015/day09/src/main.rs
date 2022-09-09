@@ -34,9 +34,10 @@ fn main() -> io::Result<()> {
         distances.insert((start.to_string(), finish.to_string()), distance.parse().unwrap());
     }
 
-    let min = solve(&cities, &distances);
+    let (min, max) = solve(&cities, &distances);
 
     println!("P1> Min Distance: {}", min);
+    println!("P2> Max Distance: {}", max);
 
     Ok(())
 }
@@ -52,13 +53,15 @@ fn calculate(distances: &HashMap<(String, String), u32>, from: String, to: Strin
     return *distances.get(&route).unwrap();
 }
 
-fn solve(cities: &Vec<String>, distances: &HashMap<(String, String), u32>) -> u32 {
+fn solve(cities: &Vec<String>, distances: &HashMap<(String, String), u32>) -> (u32, u32) {
     let cities_count = cities.len();
 
     let mut total: Vec<u32> = Vec::new();
 
+    // Review: This does the job, but produces 2x iterations because:
+    // [A,B,C] != [C, B, A]
+    // Can we skip this using itertools?
     for perm in cities.iter().permutations(cities_count) {
-
         let distance = perm.windows(2)
             .map(|pair| calculate(distances, (&pair[0]).to_string(), (&pair[1]).to_string()))
             .sum();
@@ -66,7 +69,7 @@ fn solve(cities: &Vec<String>, distances: &HashMap<(String, String), u32>) -> u3
         total.push(distance);
     }
 
-    *total.iter().min().unwrap()
+    (*total.iter().min().unwrap(), *total.iter().max().unwrap())
 }
 
 ///:w
@@ -76,9 +79,6 @@ fn solve(cities: &Vec<String>, distances: &HashMap<(String, String), u32>) -> u3
 mod tests {
     use super::*;
 
-    //
-    // Part 1 
-    //
     #[test]
     fn case_1() {
         let cities: Vec<String> = vec!["London".to_string(), "Dublin".to_string(), "Belfast".to_string()];
@@ -88,8 +88,9 @@ mod tests {
             ((String::from("Dublin"),String::from("Belfast")), 141),
         ]);
 
-        let solution = solve(&cities, &distances);
+        let (min, max) = solve(&cities, &distances);
 
-        assert_eq!(solution, 605);
+        assert_eq!(min, 605);
+        assert_eq!(max, 982);
     }
 }
