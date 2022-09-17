@@ -11,5 +11,5 @@ My AdventOfCode 🎄 Solutions ⭐ . Made in Rust 🦀
 - The idea is to complete all the challenges in my freetime before the 2022 edition starts.
 
 ## Progress
-- 2015: day: 10/25 - ⭐ 20/50 ⭐
+- 2015: day: 12/25 - ⭐ 24/50 ⭐
 - ..
