@@ -84,8 +84,8 @@ fn main() -> io::Result<()> {
     let result = race(&mut reindeers, 2503);
     println!("P1> Max distance: {}", result);
 
-    //let winner = reindeers.iter().max_by_key(|r| r.current_position).unwrap();
-    //println!("P2> Winner is: {}  wit {} pts", winner.name, winner.points);
+    let winner = reindeers.iter().max_by_key(|r| r.points).unwrap();
+    println!("P2> Winner is: {}  wit {} pts", winner.name, winner.points);
 
     // println!("{:?}", winner);
     // println!("{:?}", reindeers);
