@@ -8,6 +8,9 @@
         List<int> col2 = new List<int>();
 
         int totalDistance = 0;
+        int similarityScore = 0;
+
+        Console.WriteLine("Advent of Code 2024 - Day 1");
 
         try
         {
@@ -24,8 +27,7 @@
                 }
             }
 
-            //Console.Write($"Col 1 lenght: {col1.Count} - Col 2 lenght: {col2.Count}");
-
+            // Part I
             col1.Sort();
             col2.Sort();
 
@@ -33,7 +35,12 @@
                 totalDistance += Math.Abs(col2[i] - col1[i]);
             }
 
-            Console.Write($"Result is {totalDistance}");
+            Console.WriteLine($"Result of Part I: {totalDistance}");
+
+            // Part II
+            col1.ForEach(number => similarityScore += CalculateScoreFor(number, col2));
+
+            Console.WriteLine($"Result of Part II: {similarityScore}");
         }
         catch (FileNotFoundException)
         {
@@ -43,6 +50,11 @@
         {
             Console.WriteLine("An error occurred: " + e.Message);
         }
+    }
+
+    static int CalculateScoreFor(int target, List<int> list)
+    {
+        return target * list.Count(number => number == target);
     }
 
     static int[] ProcessLine(string line)
