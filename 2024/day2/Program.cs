@@ -4,6 +4,7 @@
     {
         string filePath = "input.txt";
         int safeReports = 0;
+        int dampenedReports = 0;
 
         Console.WriteLine("Advent of Code 2024 - Day 2");
 
@@ -15,15 +16,19 @@
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    int[] values = ProcessLine(line);
+                    List<int> values = ProcessLine(line);
 
                     if (IsSafe(values)) {
                         safeReports++;
+                    } else if (Dampener(values)){
+                        dampenedReports++;
                     }
                 }
             }
 
             Console.WriteLine($"Part I Answer; {safeReports}");
+            safeReports += dampenedReports;
+            Console.WriteLine($"Part II Answer; {safeReports}");
         }
         catch (FileNotFoundException)
         {
@@ -35,13 +40,28 @@
         }
     }
 
-    static bool IsSafe(int[] values)
+    static bool Dampener(List<int> values)
+    {
+        bool isSafe = false;
+
+        for (int i = 0; i < values.Count; i++) {
+            List<int> modifiedList = new List<int>(values); 
+            modifiedList.RemoveAt(i);
+
+            if (IsSafe(modifiedList)) {
+                return true;
+            }
+        }
+        return isSafe;
+    }
+
+    static bool IsSafe(List<int> values)
     {
         bool isSafe = true;
         bool isAsc = true;
         bool isDesc = true;
 
-        for (int i = 0; i < values.Length - 1; i++) {
+        for (int i = 0; i < values.Count - 1; i++) {
             int diff = values[i + 1] - values[i];
 
             if (diff > 0) {
@@ -64,8 +84,8 @@
         return isSafe && (isAsc || isDesc);
     }
 
-    static int[] ProcessLine(string line)
+    static List<int> ProcessLine(string line)
     {
-        return line.Split(" ").Select(int.Parse).ToArray();
+        return line.Split(" ").Select(int.Parse).ToList();
     }
 }
