@@ -7,6 +7,12 @@ class Program
     {
         string filePath = args[0];
         int resultP1 = 0;
+        int resultP2 = 0;
+
+        // look for mul(x,y)
+        Regex rg = new Regex(@"mul\((\d{1,3}),(\d{1,3})\)|don\'t\(\)|do\(\)");
+
+        bool enabled = true;
 
         Console.WriteLine("Advent of Code 2024 - Day 3");
 
@@ -18,11 +24,35 @@ class Program
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    resultP1 += ProcessLine(line);
+                    MatchCollection matches = rg.Matches(line);
+
+                    foreach (Match item in matches)
+                    {
+                        if (item.Value.StartsWith("don")){
+                            enabled = false;
+                            Console.WriteLine("ENABLED!");
+                        } else if (item.Value.StartsWith("do")) {
+                            enabled = true;
+                            Console.WriteLine("DISABLEd!");
+                        } else if (item.Value.StartsWith("mul")) {
+                            int a = int.Parse(item.Groups[1].Value);
+                            int b = int.Parse(item.Groups[2].Value);
+
+                            Console.WriteLine($"Found {item.Value} ==> {a} * {b}");
+
+                            resultP1 += a * b;
+
+                            if (enabled) {
+                                resultP2 += a * b;
+                            }
+                        }
+                        
+                    }
                 }
             }
 
             Console.WriteLine($"Result of P1: {resultP1}");
+            Console.WriteLine($"Result of P2: {resultP2}");
         }
         catch (FileNotFoundException)
         {
@@ -32,26 +62,5 @@ class Program
         {
             Console.WriteLine("An error occurred: " + e.Message);
         }
-    }
-
-    static int ProcessLine(string line)
-    {
-        // look for mul(x,y)
-        Regex rg = new Regex(@"mul\((\d{1,3}),(\d{1,3})\)");
-        
-        int lineResult = 0;
-
-        MatchCollection matches = rg.Matches(line);
-
-        foreach (Match item in matches)
-        {
-            int a = int.Parse(item.Groups[1].Value);
-            int b = int.Parse(item.Groups[2].Value);
-
-            Console.WriteLine($"Found {item.Value} ==> {a} * {b}");
-
-            lineResult += a * b;
-        }
-        return lineResult;
     }
 }
