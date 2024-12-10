@@ -7,7 +7,7 @@
         Console.WriteLine("Advent of Code 2024 - Day 5");
 
         var rules = new List<int[]>();
-        var numbers = new List<int[]>();
+        var updates = new List<int[]>();
         
         bool isNumbersSection = false;
         
@@ -39,11 +39,36 @@
                         numberList.Add(number);
                     }
                 }
-                numbers.Add(numberList.ToArray());
+                updates.Add(numberList.ToArray());
             }
         }
         
         // Part I
-        
+        int partIAnswer = 0;
+
+        // Cada Update
+        foreach (var update in updates)
+        {
+            bool valid_update = true;
+
+            foreach (var rule in rules)
+            {
+                var left  = Array.IndexOf(update, rule[0]);
+                var right  = Array.IndexOf(update, rule[1]);
+
+                if (left < 0 || right < 0) {
+                    continue;
+                }
+
+                if (left > right) {
+                    valid_update = false;
+                }
+            }
+            if (valid_update) {
+                partIAnswer += update[update.Length / 2];
+            }
+        }
+
+        Console.WriteLine($"First part is: {partIAnswer}");
     }
 }
