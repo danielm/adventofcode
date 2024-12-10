@@ -43,32 +43,75 @@
             }
         }
         
-        // Part I
         int partIAnswer = 0;
+        int partIIAnswer = 0;
 
         // Cada Update
         foreach (var update in updates)
         {
-            bool valid_update = true;
-
-            foreach (var rule in rules)
-            {
-                var left  = Array.IndexOf(update, rule[0]);
-                var right  = Array.IndexOf(update, rule[1]);
-
-                if (left < 0 || right < 0) {
-                    continue;
-                }
-
-                if (left > right) {
-                    valid_update = false;
-                }
-            }
-            if (valid_update) {
+            if (ValidUpdate(update, rules)) {
                 partIAnswer += update[update.Length / 2];
+            } else {
+                // Part II --> Reorder
+
+                partIIAnswer += ReorderUpdateRecursive(update, rules)[update.Length / 2];
+                
             }
         }
 
         Console.WriteLine($"First part is: {partIAnswer}");
+        Console.WriteLine($"Second part is: {partIIAnswer}");
+    }
+
+    static bool ValidUpdate(int[] update, List<int[]> rules)
+    {
+        foreach (var rule in rules)
+        {
+            var left  = Array.IndexOf(update, rule[0]);
+            var right  = Array.IndexOf(update, rule[1]);
+
+            // if any of the elements isn't in the current checking rule, just pass since it doesnt apply
+            if (left < 0 || right < 0) {
+                continue;
+            }
+
+            // We are comparing the indexes of each elemnts  not the values themselves
+            // if the left elemet is a in higer index then the right element, it is not valid
+            if (left > right) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    static int[] ReorderUpdateRecursive(int[] update, List<int[]> rules, int idx = 0)
+    {
+        // Last rule just was checked, we got our reordered update
+        if (idx >= rules.Count)
+        {
+            return update;
+        }
+
+        var rule = rules[idx];
+        var left = Array.IndexOf(update, rule[0]);
+        var right = Array.IndexOf(update, rule[1]);
+
+        // the >=0 is that if the elment in the rule exist in our update
+        // the left > reight checks if the order is wrong, basically the oposite of Part I
+        if (left >= 0 && right >= 0 && left > right)
+        {
+            // Swap elements
+            var tmp = update[left];
+            update[left] = update[right];
+            update[right] = tmp;
+
+            // Restart from the first rule after swap
+            return ReorderUpdateRecursive(update, rules, 0);
+        }
+
+        // Move to the next rule
+        return ReorderUpdateRecursive(update, rules, idx + 1);
     }
 }
